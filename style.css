@@ -1,0 +1,130 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+body {
+    background: linear-gradient(135deg, #4facfe, #00f2fe);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+}
+
+.container {
+    width: 400px;
+    background: white;
+    padding: 30px;
+    border-radius: 15px;
+    text-align: center;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+}
+
+h1 {
+    margin-bottom: 20px;
+    color: #333;
+}
+
+.search-box {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.search-box input {
+    flex: 1;
+    padding: 10px;
+    font-size: 16px;
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    outline: none;
+}
+
+.search-box input:focus {
+    border-color: #4facfe;
+}
+
+.search-box button {
+    padding: 10px 20px;
+    border: none;
+    background: #4facfe;
+    color: white;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.search-box button:hover {
+    background: #2196f3;
+}
+
+#weatherIcon {
+    width: 100px;
+    height: 100px;
+    margin: 10px auto;
+    display: none;
+}
+
+#weatherContainer h2 {
+    margin-bottom: 10px;
+}
+
+#weatherContainer p {
+    margin: 8px 0;
+    font-size: 18px;
+}
+
+.hidden {
+    display: none;
+}
+
+#loading {
+    margin-top: 15px;
+    color: #2196f3;
+    font-weight: bold;
+}
+
+#errorMessage {
+    color: red;
+    margin-top: 15px;
+    font-weight: bold;
+}
+
+@media (max-width: 500px) {
+
+    .container {
+        width: 90%;
+    }
+
+    .search-box {
+        flex-direction: column;
+    }
+
+    .search-box button {
+        width: 100%;
+    }
+
+}
+
+#forecastContainer{
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    flex-wrap: wrap;
+    margin-top: 20px;
+}
+
+.forecast-card{
+    background: rgba(255,255,255,0.2);
+    padding: 15px;
+    border-radius: 10px;
+    text-align: center;
+    width: 120px;
+    backdrop-filter: blur(5px);
+}
+
+.forecast-card img{
+    width: 60px;
+}
