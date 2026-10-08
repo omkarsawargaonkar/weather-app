@@ -2,76 +2,171 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Weather App</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="description" content="Live weather, hourly and 5-day forecast, air quality and sun tracking for any city.">
+    <meta name="theme-color" content="#2b7fd8">
+    <title>Skyline Weather</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&family=Figtree:wght@400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
-<body>
+<body data-sky="clear-day">
 
-    <div class="container">
+    <canvas id="sky" aria-hidden="true"></canvas>
 
-        <h1>🌤️ Weather App</h1>
+    <div class="app">
 
-        <div class="search-box">
-            <input
-                type="text"
-                id="cityInput"
-                placeholder="Enter city name"
-            >
+        <header class="topbar">
+            <a class="brand" href="./" aria-label="Skyline Weather home">
+                <span class="brand-mark" aria-hidden="true"></span>
+                <span>Skyline</span>
+            </a>
 
-            <button id="searchBtn">
-                Search
-            </button>
-            <button id="locationBtn">📍 Use My Location</button>
-        </div>
+            <div class="search" role="search">
+                <svg class="search-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+                <input
+                    type="text"
+                    id="cityInput"
+                    placeholder="Search a city"
+                    autocomplete="off"
+                    spellcheck="false"
+                    role="combobox"
+                    aria-expanded="false"
+                    aria-controls="suggestions"
+                    aria-label="Search for a city"
+                >
+                <kbd class="hint" aria-hidden="true">/</kbd>
+                <button id="searchBtn" class="btn-primary" type="button">Search</button>
+                <ul id="suggestions" class="suggestions hidden" role="listbox"></ul>
+            </div>
 
-        <div id="weatherContainer">
+            <div class="actions">
+                <button id="locationBtn" class="btn-ghost" type="button" title="Use my location">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/><circle cx="12" cy="12" r="8"/></svg>
+                    <span>My location</span>
+                </button>
+                <div class="unit-toggle" role="group" aria-label="Temperature unit">
+                    <button id="unitC" type="button" class="active" aria-pressed="true">°C</button>
+                    <button id="unitF" type="button" aria-pressed="false">°F</button>
+                </div>
+            </div>
+        </header>
 
-    <img
-        id="weatherIcon"
-        src=""
-        alt="Weather Icon"
-    >
+        <div id="recent" class="recent hidden" aria-label="Recent searches"></div>
 
-    <h2 id="cityName">City Name</h2>
+        <p id="status" class="status hidden" role="status" aria-live="polite"></p>
 
-    <p id="temperature">
-        Temperature:
-    </p>
+        <main id="content" class="content hidden">
 
-    <p id="weatherCondition">
-        Condition:
-    </p>
+            <section class="hero" aria-labelledby="cityName">
+                <div class="hero-top">
+                    <div>
+                        <h1 id="cityName">City</h1>
+                        <p id="localTime" class="local-time"></p>
+                    </div>
+                    <button id="shareBtn" class="btn-ghost small" type="button" title="Copy a summary">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V6a2 2 0 0 1 2-2h9"/></svg>
+                        <span>Copy summary</span>
+                    </button>
+                </div>
 
-    <p id="humidity">
-        Humidity:
-    </p>
+                <div class="hero-main">
+                    <div class="temp-block">
+                        <div class="temp"><span id="temperature">--</span><span id="tempUnit" class="deg">°</span></div>
+                        <p id="weatherCondition" class="condition"></p>
+                        <p id="highLow" class="highlow"></p>
+                    </div>
+                    <div id="weatherIcon" class="big-icon" aria-hidden="true"></div>
+                </div>
 
-    <p id="windSpeed">
-        Wind Speed:
-    </p>
+                <p id="advice" class="advice"></p>
+            </section>
 
-    <p id="feelsLike">
-        Feels Like:
-    </p>
+            <section class="panel hourly" aria-labelledby="hourlyTitle">
+                <h2 id="hourlyTitle">Next 24 hours</h2>
+                <div id="hourlyContainer" class="hourly-strip"></div>
+            </section>
 
-</div>
+            <section class="panel forecast" aria-labelledby="forecastTitle">
+                <h2 id="forecastTitle">5-day forecast</h2>
+                <div id="forecastContainer" class="forecast-list"></div>
+            </section>
 
-<h2>5-Day Forecast</h2>
+            <section class="details" aria-label="Current conditions">
+                <article class="tile sun-tile">
+                    <h3>Sun</h3>
+                    <svg id="sunArc" viewBox="0 0 220 120" role="img" aria-label="Sun position today">
+                        <path class="arc-bg" d="M 20 105 A 90 90 0 0 1 200 105"/>
+                        <path id="arcDone" class="arc-done" d="M 20 105 A 90 90 0 0 1 200 105"/>
+                        <line class="horizon" x1="8" y1="105" x2="212" y2="105"/>
+                        <g id="sunMarker"><circle class="sun-glow" r="14"/><circle class="sun-dot" r="7"/></g>
+                    </svg>
+                    <div class="sun-times">
+                        <p><span>Sunrise</span><strong id="sunrise">--</strong></p>
+                        <p><span>Sunset</span><strong id="sunset">--</strong></p>
+                    </div>
+                    <p id="daylight" class="tile-note"></p>
+                </article>
 
-<div id="forecastContainer">
+                <article class="tile">
+                    <h3>Feels like</h3>
+                    <p class="tile-value" id="feelsLike">--</p>
+                    <p class="tile-note" id="feelsNote"></p>
+                </article>
 
-</div>
+                <article class="tile">
+                    <h3>Humidity</h3>
+                    <p class="tile-value" id="humidity">--</p>
+                    <div class="meter"><i id="humidityBar"></i></div>
+                    <p class="tile-note" id="humidityNote"></p>
+                </article>
 
-<div id="loading" class="hidden">
-    Loading...
-</div>
+                <article class="tile">
+                    <h3>Wind</h3>
+                    <div class="wind-row">
+                        <p class="tile-value" id="windSpeed">--</p>
+                        <svg class="compass" viewBox="0 0 60 60" aria-hidden="true">
+                            <circle cx="30" cy="30" r="27"/>
+                            <g id="windArrow"><path d="M30 10 L36 34 L30 30 L24 34 Z"/></g>
+                        </svg>
+                    </div>
+                    <p class="tile-note" id="windNote"></p>
+                </article>
 
-<p id="errorMessage" class="hidden"></p>
+                <article class="tile">
+                    <h3>Air quality</h3>
+                    <p class="tile-value" id="aqiValue">--</p>
+                    <div class="aqi-scale"><i id="aqiPin"></i></div>
+                    <p class="tile-note" id="aqiNote"></p>
+                </article>
 
+                <article class="tile">
+                    <h3>Pressure</h3>
+                    <p class="tile-value" id="pressure">--</p>
+                    <p class="tile-note" id="pressureNote"></p>
+                </article>
+
+                <article class="tile">
+                    <h3>Visibility</h3>
+                    <p class="tile-value" id="visibility">--</p>
+                    <p class="tile-note" id="visibilityNote"></p>
+                </article>
+
+                <article class="tile">
+                    <h3>Cloud cover</h3>
+                    <p class="tile-value" id="clouds">--</p>
+                    <div class="meter"><i id="cloudBar"></i></div>
+                </article>
+            </section>
+
+        </main>
+
+        <footer class="footer">
+            <p>Data from <a href="https://openweathermap.org/" target="_blank" rel="noopener">OpenWeather</a>. Press <kbd>/</kbd> to search.</p>
+        </footer>
     </div>
 
     <script src="script.js"></script>
-
 </body>
 </html>
